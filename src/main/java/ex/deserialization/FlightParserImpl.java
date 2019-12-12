@@ -10,8 +10,7 @@ import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
-public class FlightParserImpl implements FlightParser {
-
+public class FlightParserImpl implements FlightParser, java.io.Serializable {
     private SparkSession sparkSession;
 
     public FlightParserImpl() {
@@ -42,6 +41,28 @@ public class FlightParserImpl implements FlightParser {
     @Override
     public Dataset<Flight> parseFlights(String path) {
         Dataset<String> lines = sparkSession.sqlContext().read().textFile(path);
-        return null;
+        org.apache.spark.api.java.JavaRDD<String> rdd_string = lines.toJavaRDD();
+        org.apache.spark.api.java.JavaRDD<Flight> rdd_flight =  rdd_string.mapPartitions(
+            new org.apache.spark.api.java.function.FlatMapFunction<java.util.Iterator<String>, Flight>() {
+                private static final long serialVersionUID = 1L;
+                
+                @Override
+                public java.util.Iterator<Flight> call(java.util.Iterator<String> lines) throws Exception {
+                    java.util.List<Flight> flights = new java.util.ArrayList<>();
+                    GsonBuilder gsonBuilder = new GsonBuilder();
+                    FlightAdapter flightAdapter = new FlightAdapter();
+                    gsonBuilder.registerTypeAdapter(FlightObj.class, flightAdapter);
+                    Gson customGson = gsonBuilder.create();
+                    while (lines.hasNext()) {
+                        String line = lines.next();
+                        Flight flight = customGson.fromJson(line, FlightObj.class).getFlight();
+                        System.out.println(flight.toString());
+                        flights.add(flight);
+                    }
+                    return flights.iterator();
+                  }
+            }
+        );
+        return this.sparkSession.createDataset(rdd_flight.rdd(), Encoders.bean(Flight.class));
     }
 }
