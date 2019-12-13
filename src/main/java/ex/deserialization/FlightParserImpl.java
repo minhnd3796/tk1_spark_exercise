@@ -10,7 +10,7 @@ import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 
-public class FlightParserImpl implements FlightParser, java.io.Serializable {
+public class FlightParserImpl implements FlightParser {
     private SparkSession sparkSession;
 
     public FlightParserImpl() {
@@ -19,7 +19,8 @@ public class FlightParserImpl implements FlightParser, java.io.Serializable {
     }
 
     /**
-     * Returns a Dataframe, containing all objects from the JSON files in the given path.
+     * Returns a Dataframe, containing all objects from the JSON files in the given
+     * path.
      *
      * @param path the path containing (only) the JSON files
      * @return Dataframe containing the input data
@@ -30,10 +31,11 @@ public class FlightParserImpl implements FlightParser, java.io.Serializable {
     }
 
     /**
-     * Deserializes the JSON lines to Flight objects. Each String in the given Dataset represents a JSON object.
-     * Use Gson for this.
-     * Hints: Apply a map function (mapPartitions) on the dataset, in which you use Gson to deserialize each line into objects of FlightObj.
-     * Use GsonBuilder to register the type adapter "FlightAdapter" for FlightObj and to create a Gson object.
+     * Deserializes the JSON lines to Flight objects. Each String in the given
+     * Dataset represents a JSON object. Use Gson for this. Hints: Apply a map
+     * function (mapPartitions) on the dataset, in which you use Gson to deserialize
+     * each line into objects of Flight. Use GsonBuilder to register the type
+     * adapter "FlightAdapter" for Flight and to create a Gson object.
      *
      * @param path the path to parse the jsons from
      * @return dataset of Flight objects parsed from the JSON lines
@@ -41,28 +43,17 @@ public class FlightParserImpl implements FlightParser, java.io.Serializable {
     @Override
     public Dataset<Flight> parseFlights(String path) {
         Dataset<String> lines = sparkSession.sqlContext().read().textFile(path);
-        org.apache.spark.api.java.JavaRDD<String> rdd_string = lines.toJavaRDD();
-        org.apache.spark.api.java.JavaRDD<Flight> rdd_flight =  rdd_string.mapPartitions(
-            new org.apache.spark.api.java.function.FlatMapFunction<java.util.Iterator<String>, Flight>() {
-                private static final long serialVersionUID = 1L;
-                
-                @Override
-                public java.util.Iterator<Flight> call(java.util.Iterator<String> lines) throws Exception {
-                    java.util.List<Flight> flights = new java.util.ArrayList<>();
-                    GsonBuilder gsonBuilder = new GsonBuilder();
-                    FlightAdapter flightAdapter = new FlightAdapter();
-                    gsonBuilder.registerTypeAdapter(FlightObj.class, flightAdapter);
-                    Gson customGson = gsonBuilder.create();
-                    while (lines.hasNext()) {
-                        String line = lines.next();
-                        Flight flight = customGson.fromJson(line, FlightObj.class).getFlight();
-                        System.out.println(flight.toString());
-                        flights.add(flight);
-                    }
-                    return flights.iterator();
-                  }
-            }
-        );
-        return this.sparkSession.createDataset(rdd_flight.rdd(), Encoders.bean(Flight.class));
+        Dataset<Flight> datasetFlights = lines.mapPartitions(
+            (org.apache.spark.api.java.function.MapPartitionsFunction<String, Flight>) it -> {
+                java.util.List<Flight> flights = new java.util.ArrayList<>();
+                GsonBuilder gsonBuilder = new GsonBuilder();
+                FlightAdapter flightAdapter = new FlightAdapter();
+                gsonBuilder.registerTypeAdapter(FlightObj.class, flightAdapter);
+                Gson customGson = gsonBuilder.create();
+                while (it.hasNext())
+                    flights.add(customGson.fromJson(it.next(), FlightObj.class).getFlight());
+                return flights.iterator();
+            }, Encoders.bean(Flight.class));
+        return datasetFlights;
     }
 }

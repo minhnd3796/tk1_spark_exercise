@@ -11,6 +11,14 @@ public class Flight implements Serializable {
     private String flightStatus;
     private String scheduled;
 
+    // public void setDepartureAirport(String departureAirport) {}
+
+    // public void setArrivalAirport(String arrivalAirport) {}
+
+    // public void setOriginDate(String originDate) {}
+
+    // public void setFlightStatus(String flightStatus) {}
+
     public String getAirlineDisplayCode() {
         if (airlineDisplayCode == null) return "";
         return airlineDisplayCode;

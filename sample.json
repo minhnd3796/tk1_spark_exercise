@@ -1,0 +1,78 @@
+{
+    "flight": {
+        "operatingAirline": {
+            "iataCode": "LH",
+            "icaoCode": "DLH",
+            "name": "Lufthansa",
+            "airlineDisplayCode": "LH"
+        },
+        "serviceTypeCode": "PP",
+        "aircraftType": {
+            "icaoCode": "A320",
+            "modelName": "A32A",
+            "registration": "DAIZZ"
+        },
+        "flightNumber": {
+            "airlineCode": "LH",
+            "trackNumber": "1423",
+            "suffix": ""
+        },
+        "codeShares": [
+            {
+                "codeShare": {
+                    "airlineCode": "AC",
+                    "trackNumber": "9165",
+                    "suffix": ""
+                }
+            },
+            {
+                "codeShare": {
+                    "airlineCode": "SK",
+                    "trackNumber": "3731",
+                    "suffix": ""
+                }
+            },
+            {
+                "codeShare": {
+                    "airlineCode": "SQ",
+                    "trackNumber": "2173",
+                    "suffix": ""
+                }
+            },
+            {
+                "codeShare": {
+                    "airlineCode": "TP",
+                    "trackNumber": "7553",
+                    "suffix": ""
+                }
+            },
+            {
+                "codeShare": {
+                    "airlineCode": "UA",
+                    "trackNumber": "9286",
+                    "suffix": ""
+                }
+            }
+        ],
+        "departureAirport": "OTP",
+        "arrivalAirport": "FRA",
+        "originDate": "2018-08-08",
+        "arrival": {
+            "scheduled": "2018-08-08T05:40:00Z",
+            "terminal": "1",
+            "gates": [
+                {
+                    "gate": "AEUW"
+                }
+            ],
+            "estimated": "2018-08-08T05:27:00Z",
+            "actual": "2018-08-08T05:27:59Z",
+            "baggageClaim": [
+                {
+                    "carousel": "5"
+                }
+            ]
+        },
+        "flightStatus": "B"
+    }
+}

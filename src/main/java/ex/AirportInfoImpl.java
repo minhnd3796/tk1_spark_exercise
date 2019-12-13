@@ -155,7 +155,10 @@ public class AirportInfoImpl implements AirportInfo {
     @Override
     public Dataset<Flight> flightsOfAirlineWithStatus(Dataset<Flight> flights, String airlineDisplayCode, String status1, String... status) {
         // TODO: Implement
-        return null;
+        Dataset<Flight> queriedflights = flights
+            .filter(r -> r.getAirlineDisplayCode().equals(airlineDisplayCode))
+            .filter(r-> r.getFlightStatus().equals(status1) || java.util.Arrays.asList(status).contains(r.getFlightStatus()));
+        return queriedflights;
     }
 
     /**
@@ -174,7 +177,15 @@ public class AirportInfoImpl implements AirportInfo {
     @Override
     public double avgNumberOfFlightsInWindow(Dataset<Flight> flights, String lowerLimit, String upperLimit) {
         // TODO: Implement
-        return 0.0d;
+        Dataset<Flight> queriedflights = flights
+            .filter(r ->
+                (r.getScheduledTime() != "" && (isBefore(r.getScheduledTime(), upperLimit)
+                    && isBefore(lowerLimit, r.getScheduledTime()))));
+        long numFlights = queriedflights.count();
+        Dataset<String> queriedFlights_string = queriedflights.map(f -> f.getScheduled().substring(0, 10), Encoders.STRING());
+        Dataset<String> queriedFlights_string_distinct = queriedFlights_string.distinct();
+        long numDays = queriedFlights_string_distinct.count();
+        return (double) numFlights / (double) numDays;
     }
 
     /**

@@ -30,6 +30,12 @@ public class Main {
     private static void exampleOutput(AirportInfoImpl airportInfo, FlightParser flightParser) {
         Dataset<Row> firstDay = flightParser.parseRows("./Fraport/*-08-08-*");
         airportInfo.sparkExample(firstDay);
-        System.out.println(airportInfo.ryanairStrike(flightParser.parseRows("./Fraport/*")));
+        // System.out.println(airportInfo.ryanairStrike(flightParser.parseRows("./Fraport/*")));
+
+        Dataset<Flight> flights = flightParser.parseFlights("./Fraport/*");
+        // Dataset<Flight> queriedFlights = airportInfo.flightsOfAirlineWithStatus(flights, "DE", "X", "S", "");
+        // queriedFlights.show(false);
+        double count = airportInfo.avgNumberOfFlightsInWindow(flights, "00:00:00", "23:59:59");
+        System.out.println(count);
     }
 }
